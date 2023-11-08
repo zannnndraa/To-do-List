@@ -61,6 +61,10 @@
     border-radius: 0.3rem;
     margin-bottom: 10px;
   }
+  .task:hover {
+    background-color: #f0f0f0;
+    cursor: pointer; 
+  }
   
   /* TaskContent */
   .content {
@@ -71,6 +75,7 @@
     font-size: 15px;
   }
   
+  
   /* Del&Com */
   .button-container {
     display: flex;
@@ -79,7 +84,6 @@
     align-items: center;
     gap: 10px;
   }
-  
   /* Del&CompStyle */
   button {
     background-color: #fff;
@@ -95,7 +99,6 @@
     margin-left: 0.5rem;
     cursor: pointer;
   }
-  
   button.delete {
     background-color: rgba(63, 133, 116, 0.833);
     color: #fff;
@@ -125,7 +128,6 @@
     margin-top: 20px;
     
   }
-  
   /* Completed List */
   .btnCompleteTask {
     display: flex;
@@ -137,6 +139,11 @@
     border-radius: 0.3rem;
     margin-bottom: 6px;
   }
+  .btnCompleteTask:hover {
+    background-color: rgba(45, 98, 77, 0.717);
+    cursor: pointer;
+  }
+
   
   /* list of task cont. */
   .tasks-container {

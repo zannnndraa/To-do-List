@@ -2,6 +2,7 @@
   <div>
     <!-- header content -->
     <div class="header">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
       <h1>Todo List</h1>
       <div class="create-new">
         <input
@@ -9,7 +10,7 @@
           @keydown.enter="addTask"
           placeholder="Add new task..."
         />
-        <button @click="addTask">Add</button>
+        <button @click="addTask"><i class="fas fa-plus"></i> Add</button>
       </div>
     </div>
     <div class="tasks-container">
@@ -25,7 +26,7 @@
         </div>
         <div class="buttons">
           <button @click="toggleTaskStatus(index)">Done</button>
-          <button class="delete" @click="deleteTask(index)">Delete</button>
+          <button class="delete" @click="deleteTask(index)"><i class="fas fa-trash-alt"></i></button>
         </div>
       </div>
     </div>
@@ -33,10 +34,10 @@
     <div class="completed-tasks">
       <h4>Completed Tasks</h4>
       <div v-for="(completedTask, index) in completedTasks" :key="index" class="btnCompleteTask">
-        <p>{{ completedTask.text }}</p>
+        <p> <i class="fas fa-check"></i>   {{ completedTask.text }}</p>
         <div>
-        <button class="undo" @click="undoTask(index)">Undo</button>
-        <button class="delete" @click="deleteCompletedTask(index)">Delete</button>
+          <button class="undo" @click="undoTask(index)"> <i class="fas fa-undo"></i> </button>
+          <button class="delete" @click="deleteCompletedTask(index)"><i class="fas fa-trash-alt"></i></button>
       </div>
     </div>
     </div>
@@ -93,8 +94,8 @@ const deleteCompletedTask = (index: number) => {
 
 </script>
 
-<style scoped>  
-  @import './assets/main.css';  
+<style scoped>
+  @import './assets/main.css';
 
   ::placeholder {
     color: rgb(119, 170, 151);
