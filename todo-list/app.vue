@@ -14,15 +14,15 @@
       </div>
     </div>
     <div class="tasks-container">
-      <h4>List of Tasks</h4>
+      <h4>ActiveTasks</h4>
     <div class="tasks">
       <div
         v-for="(task, index) in tasks"
         :key="index"
         :class="{ 'task': true, 'is-complete': task.completed }"
       >
-        <div class="content" :class="{ 'completed': task.completed }">
-          <p :class="{ 'placeholder': task.text === '' }" :style="{ 'text-decoration': task.completed ? 'line-through' : 'none' }">{{ task.text }}</p>
+        <div class="content" :class="{ 'completed': task.completed }" >
+          <p class="{ 'text-decoration': task.completed ? 'line-through' : 'none' }">{{ task.text }}</p>
         </div>
         <div class="buttons">
           <button @click="toggleTaskStatus(index)">Done</button>
@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 type Task = { text: string; completed: boolean };
 
@@ -53,10 +53,28 @@ const newTask = ref('');
 const tasks = ref<Task[]>([]);
 const completedTasks = ref<Task[]>([]);
 
+onMounted(() => {
+  const savedTasks = localStorage.getItem('tasks');
+  if (savedTasks) {
+    tasks.value = JSON.parse(savedTasks);
+  }
+
+  const savedCompletedTasks = localStorage.getItem('completedTasks');
+  if (savedCompletedTasks) {
+    completedTasks.value = JSON.parse(savedCompletedTasks);
+  }
+});
+
+const saveTasksToLocalStorage = () => {
+  localStorage.setItem('tasks', JSON.stringify(tasks.value));
+  localStorage.setItem('completedTasks', JSON.stringify(completedTasks.value));
+};
+
 const addTask = () => {
   if (newTask.value.trim() !== '') {
     tasks.value.push({ text: newTask.value, completed: false });
     newTask.value = '';
+    saveTasksToLocalStorage();
   }
 };
 
@@ -67,6 +85,7 @@ const toggleTaskStatus = (index: number) => {
     completedTasks.value.push(task);
     tasks.value.splice(index, 1);
   }
+  saveTasksToLocalStorage();
 };
 
 const undoTask = (index: number) => {
@@ -75,16 +94,12 @@ const undoTask = (index: number) => {
     completedTasks.value.splice(index, 1);
     task.completed = false;
     tasks.value.push(task);
+    saveTasksToLocalStorage();
   }
 };
 
 const deleteTask = (index: number) => {
-  const source = tasks.value[index].completed ? 'completedTasks' : 'tasks';
-  const task = source === 'tasks' ? tasks.value[index] : completedTasks.value[index];
-  if (task) {
-    tasks.value.splice(index, 1);
-    completedTasks.value.splice(index, 1);
-  }
+  tasks.value.splice(index, 1);
 };
 
 const deleteCompletedTask = (index: number) => {

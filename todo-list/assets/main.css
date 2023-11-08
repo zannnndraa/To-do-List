@@ -57,7 +57,7 @@
     justify-content: space-between;
     align-items: center;
     background-color: rgba(221, 238, 221);
-    padding: 1px 32px;
+    padding: 1px 10px;
     border-radius: 0.3rem;
     margin-bottom: 10px;
   }
@@ -70,7 +70,7 @@
   .content {
     flex-grow: 2;
     color: #000;
-    margin: 1px;
+    margin: 0.5px;
     text-align: left;
     font-size: 15px;
   }
@@ -135,7 +135,7 @@
     align-items: center;
     background-color: rgba(221, 238, 221, 0.151);
     color: #ffffff; 
-    padding: 2px 25px;
+    padding: 1px 10px;
     border-radius: 0.3rem;
     margin-bottom: 6px;
   }
@@ -148,11 +148,10 @@
   /* list of task cont. */
   .tasks-container {
     background: rgba(255, 255, 255, 0.8); 
-    border: 1px solid #ddddddc6;
-    padding: 10px;
+    border: 1px solid rgba(167, 223, 198, 0.776);
+    padding: 2px;
     margin: 10px;
     border-radius: 0.5rem;
+    color:  #093a269c;
    
   }
-
-  
