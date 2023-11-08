@@ -7,7 +7,7 @@
         <input
           v-model="newTask"
           @keydown.enter="addTask"
-          placeholder="Add a new task..."
+          placeholder="Add new task..."
         />
         <button @click="addTask">Add</button>
       </div>
@@ -34,11 +34,13 @@
       <h4>Completed Tasks</h4>
       <div v-for="(completedTask, index) in completedTasks" :key="index" class="btnCompleteTask">
         <p>{{ completedTask.text }}</p>
+        <div>
         <button class="undo" @click="undoTask(index)">Undo</button>
- 
+        <button class="delete" @click="deleteCompletedTask(index)">Delete</button>
+      </div>
     </div>
     </div>
-  </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -83,6 +85,12 @@ const deleteTask = (index: number) => {
     completedTasks.value.splice(index, 1);
   }
 };
+
+const deleteCompletedTask = (index: number) => {
+  completedTasks.value.splice(index, 1);
+};
+
+
 </script>
 
 <style scoped>  
