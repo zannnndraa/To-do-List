@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="tasks-container">
-      <h4>ActiveTasks</h4>
+      <h4>Active Tasks</h4>
     <div class="tasks">
       <div
         v-for="(task, index) in tasks"
@@ -26,6 +26,7 @@
         </div>
         <div class="buttons">
           <button @click="toggleTaskStatus(index)">Done</button>
+          <button @click="editTask(index)"><i class="fa fa-edit"></i></button>
           <button class="delete" @click="deleteTask(index)"><i class="fas fa-trash-alt"></i></button>
         </div>
       </div>
@@ -105,7 +106,14 @@ const deleteTask = (index: number) => {
 const deleteCompletedTask = (index: number) => {
   completedTasks.value.splice(index, 1);
 };
-
+ 
+const editTask = (index: number) => {
+  const editedText = prompt('Edit task:', tasks.value[index].text);
+  if (editedText !== null) {
+    tasks.value[index].text = editedText;
+    saveTasksToLocalStorage();
+  }
+};
 
 </script>
 
