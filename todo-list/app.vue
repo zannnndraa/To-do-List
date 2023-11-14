@@ -3,6 +3,8 @@
     <!-- header content -->
     <div class="header">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+      
       <h1>Todo List</h1>
       <div class="create-new">
         <input
