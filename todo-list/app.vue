@@ -36,11 +36,20 @@
         </div>
       </div>
     </div>
+     <!-- Display completed tasks -->
+     <div class="completed-tasks">
+      <h4>Completed Tasks</h4>
+      <div v-for="(completedTask, index) in completedTasks" :key="index" class="btnCompleteTask">
+        <p> <i class="fas fa-check"></i>   {{ completedTask.text }}</p>
+        <div>
+          <button class="undo" @click="undoTask(completedTask.id)"> <i class="fas fa-undo"></i> </button>
+          <button class="delete" @click="deleteCompletedTask(completedTask.id)"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      </div>
+    </div>
    
   </div>
 </template>
-
-
 
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -67,7 +76,6 @@ const toggleTaskStatus = async (id: number) => {
   const taskIndex = tasks.value.findIndex((task) => task.id === id);
   const task = tasks.value[taskIndex];
   if (!task.completed) {
-    // Update task status on the server
     await api.put(`/todos/${id}`, { ...task, completed: true });
     task.completed = true;
     completedTasks.value.push(task);
@@ -79,7 +87,6 @@ const undoTask = async (id: number) => {
   const taskIndex = completedTasks.value.findIndex((task) => task.id === id);
   const task = completedTasks.value[taskIndex];
   if (task) {
-    // Update task status on the server
     await api.put(`/todos/${id}`, { ...task, completed: false });
     completedTasks.value.splice(taskIndex, 1);
     task.completed = false;
@@ -98,11 +105,11 @@ const deleteCompletedTask = async (id: number) => {
 };
 
 const editTask = async (id: number) => {
-  const editedText = prompt('Edit task:', tasks.value[id].text);
+  const taskIndex = tasks.value.findIndex((task) => task.id === id);
+  const editedText = prompt('Edit task:', tasks.value[taskIndex].text);
   if (editedText !== null) {
-    // Update task text on the server
-    await api.put(`/todos/${id}`, { ...tasks.value[id], text: editedText });
-    tasks.value[id].text = editedText;
+    await api.put(`/todos/${id}`, { ...tasks.value[taskIndex], text: editedText });
+    tasks.value[taskIndex].text = editedText;
   }
 };
 </script>
