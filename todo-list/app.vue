@@ -19,16 +19,12 @@
       </div>
     </div>
 
-    <!-- Add the tasks container here -->
-    <div class="tasks-container">
+    <!-- List of tasks container -->
+     <!-- Add the tasks container here -->
+     <div class="tasks-container">
       <h4>Active Tasks</h4>
-      <div v-if="tasks.length === 0">Loading tasks...</div>
-      <div class="tasks" v-else>
-        <div
-          v-for="(task, index) in tasks"
-          :key="index"
-          :class="{ 'task': true, 'is-complete': task.completed }"
-        >
+      <div class="tasks">
+        <div v-for="(task, index) in tasks" :key="index" :class="{ 'task': true, 'is-complete': task.completed }">
           <div class="content" :class="{ 'completed': task.completed }">
             <p class="{ 'text-decoration': task.completed ? 'line-through' : 'none' }">{{ task.text }}</p>
           </div>
@@ -47,7 +43,7 @@
 
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import api from './api/api';
 
 type Task = { id: number; text: string; completed: boolean };
@@ -55,13 +51,6 @@ type Task = { id: number; text: string; completed: boolean };
 const newTask = ref('');
 const tasks = ref<Task[]>([]);
 const completedTasks = ref<Task[]>([]);
-
-onMounted(async () => {
-  
-  const response = await api.get('/todos');
-  tasks.value = response.data.slice(0, 5); 
-  completedTasks.value = response.data.slice(5, 10); 
-});
 
 const addTask = async () => {
   if (newTask.value.trim() !== '') {
