@@ -41,7 +41,7 @@
         <p> <i class="fas fa-check"></i> {{ completedTask.text }}</p>
         <div>
           <button class="undo" @click="undoTask(completedTask.id)"> <i class="fas fa-undo"></i> </button>
-          <button class="delete" @click="deleteCompletedTask(completedTask.id)"><i class="fas fa-trash-alt"></i></button>
+          <button class="delete" @click="deleteCompletedTask(completedTask.id, index)"><i class="fas fa-trash-alt"></i></button>
         </div>
       </div>
     </div>
@@ -94,16 +94,13 @@ const toggleTaskStatus = async (id: number, index: number) => {
   }
 };
 
-const undoTask = async (id: number) => {
-  try {
-    const taskIndex = completedTasks.value.findIndex((task) => task.id === id);
-    const task = completedTasks.value[taskIndex];
-    await api.put(`/todos/${id}`, { ...task, completed: false });
-    completedTasks.value.splice(taskIndex, 1);
+
+const undoTask = async (index: number) => {
+  const task = completedTasks.value[index];
+  if (task) {
+    completedTasks.value.splice(index, 1);
     task.completed = false;
     tasks.value.push(task);
-  } catch (error) {
-    console.error('Error undoing task:', error);
   }
 };
 
@@ -125,12 +122,16 @@ const deleteCompletedTask = async (id: number, index: number) => {
   }
 };
 
+
 const editTask = async (id: number, index: number) => {
   const editedText = prompt('Edit task:', tasks.value[index].text);
   if (editedText !== null) {
     try {
-      await api.put(`/todos/${id}`, { ...tasks.value[index], text: editedText });
-      tasks.value[index].text = editedText;
+      
+      const response = await api.put(`/todos/${id}`, { ...tasks.value[index], text: editedText });
+
+      
+      tasks.value.splice(index, 1, response.data);
     } catch (error) {
       console.error('Error editing task:', error);
     }
