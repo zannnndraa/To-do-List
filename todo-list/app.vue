@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <!-- List of tasks container -->
+    <!-- List of tasks -->
     <div class="tasks-container">
       <h4>Active Tasks</h4>
       <div class="tasks">
@@ -34,13 +34,13 @@
       </div>
     </div>
 
-    <!-- Display completed tasks -->
+    <!-- completed tasks -->
     <div class="completed-tasks">
       <h4>Completed Tasks</h4>
       <div v-for="(completedTask, index) in completedTasks" :key="index" class="btnCompleteTask">
         <p> <i class="fas fa-check"></i> {{ completedTask.text }}</p>
         <div>
-          <button class="undo" @click="undoTask(completedTask.id)"> <i class="fas fa-undo"></i> </button>
+          <button class="undo" @click="undoTask(completedTask.id, index)"> <i class="fas fa-undo"></i> </button>
           <button class="delete" @click="deleteCompletedTask(completedTask.id, index)"><i class="fas fa-trash-alt"></i></button>
         </div>
       </div>
@@ -84,10 +84,12 @@ const toggleTaskStatus = async (id: number, index: number) => {
 
     tasks.value.splice(index, 1);
     if (!task.completed) {
-      completedTasks.value.push(response.data);
+    
+      const completedTask = response.data;
+      completedTasks.value.push(task);
     } else {
-      tasks.value.push(response.data);
       completedTasks.value = completedTasks.value.filter((completedTask) => completedTask.id !== id);
+      tasks.value.push(response.data);
     }
   } catch (error) {
     console.error('Error toggling task status:', error);
@@ -95,14 +97,20 @@ const toggleTaskStatus = async (id: number, index: number) => {
 };
 
 
-const undoTask = async (index: number) => {
+const undoTask = async (id: number, index: number) => {
   const task = completedTasks.value[index];
   if (task) {
-    completedTasks.value.splice(index, 1);
-    task.completed = false;
-    tasks.value.push(task);
+    try {
+      const response = await api.patch(`/todos/${id}`, { completed: false });
+      completedTasks.value.splice(index, 1);
+      task.completed = false;
+      tasks.value.push(task);
+    } catch (error) {
+      console.error('Error undoing task:', error);
+    }
   }
 };
+
 
 const deleteTask = async (id: number, index: number) => {
   try {
