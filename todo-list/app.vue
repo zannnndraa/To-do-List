@@ -15,16 +15,18 @@
 
     <!-- List of tasks -->
     <div class="tasks-container">
-      <h4>Active Tasks</h4>
-      <div class="tasks">
-        <div
-          v-for="(task, index) in tasks"
-          :key="index"
-          :class="{ 'task': true, 'is-complete': task.completed }"
-        >
-          <div class="content" :class="{ 'completed': task.completed }">
-            <p :style="{ 'text-decoration': task.completed ? 'line-through' : 'none' }">{{ task.text }}</p>
-          </div>
+  <h4>Active Tasks</h4>
+  <div class="tasks">
+    <div
+      v-for="(task, index) in tasks"
+      :key="index"
+      :class="{ 'task': true, 'is-complete': task.completed }"
+    >
+      <div class="content" :class="{ 'completed': task.completed }">
+        <p :style="{ 'text-decoration': task.completed ? 'line-through' : 'none' }">{{ task.text }}</p>
+        <p class="task-date">{{ task.date }}</p> 
+      </div>
+      
           <div class="buttons">
             <button @click="toggleTaskStatus(task.id, index)">Done</button>
             <button @click="editTask(task.id, index)"><i class="fa fa-edit"></i></button>
@@ -54,28 +56,36 @@ import api from './api/api';
 
 let nextTaskId = 1;
 
-type Task = { id: number; text: string; completed: boolean };
+type Task = { id: number; text: string; completed: boolean; date: string };
+
 
 const newTask = ref('');
 const tasks = ref<Task[]>([]);
 const completedTasks = ref<Task[]>([]);
 
 const generateTaskId = () => {
-  return nextTaskId++;
+  const currentDate = new Date();
+  const dateString = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+  return `${dateString}-${nextTaskId++}`;
 };
+
 
 const addTask = async () => {
   if (newTask.value.trim() !== '') {
     const taskId = generateTaskId();
+    const currentDate = new Date();
+    const date = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}`;
     const response = await api.post('/todos', {
       id: taskId,
       text: newTask.value,
       completed: false,
+      date: date,
     });
     tasks.value.push(response.data);
     newTask.value = '';
   }
 };
+
 
 const toggleTaskStatus = async (id: number, index: number) => {
   const task = tasks.value[index];
