@@ -46,9 +46,8 @@
     </div>
     </div>
 </template>
-
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 
 type Task = { text: string; completed: boolean };
 
@@ -56,28 +55,10 @@ const newTask = ref('');
 const tasks = ref<Task[]>([]);
 const completedTasks = ref<Task[]>([]);
 
-onMounted(() => {
-  const savedTasks = localStorage.getItem('tasks');
-  if (savedTasks) {
-    tasks.value = JSON.parse(savedTasks);
-  }
-
-  const savedCompletedTasks = localStorage.getItem('completedTasks');
-  if (savedCompletedTasks) {
-    completedTasks.value = JSON.parse(savedCompletedTasks);
-  }
-});
-
-const saveTasksToLocalStorage = () => {
-  localStorage.setItem('tasks', JSON.stringify(tasks.value));
-  localStorage.setItem('completedTasks', JSON.stringify(completedTasks.value));
-};
-
 const addTask = () => {
   if (newTask.value.trim() !== '') {
     tasks.value.push({ text: newTask.value, completed: false });
     newTask.value = '';
-    saveTasksToLocalStorage();
   }
 };
 
@@ -88,7 +69,6 @@ const toggleTaskStatus = (index: number) => {
     completedTasks.value.push(task);
     tasks.value.splice(index, 1);
   }
-  saveTasksToLocalStorage();
 };
 
 const undoTask = (index: number) => {
@@ -97,7 +77,6 @@ const undoTask = (index: number) => {
     completedTasks.value.splice(index, 1);
     task.completed = false;
     tasks.value.push(task);
-    saveTasksToLocalStorage();
   }
 };
 
@@ -113,11 +92,11 @@ const editTask = (index: number) => {
   const editedText = prompt('Edit task:', tasks.value[index].text);
   if (editedText !== null) {
     tasks.value[index].text = editedText;
-    saveTasksToLocalStorage();
   }
 };
 
 </script>
+
 
 <style scoped>
   @import './assets/main.css';
