@@ -122,21 +122,19 @@ const deleteCompletedTask = async (id: number, index: number) => {
   }
 };
 
-
 const editTask = async (id: number, index: number) => {
   const editedText = prompt('Edit task:', tasks.value[index].text);
   if (editedText !== null) {
     try {
-      
-      const response = await api.put(`/todos/${id}`, { ...tasks.value[index], text: editedText });
-
-      
-      tasks.value.splice(index, 1, response.data);
+      const response = await api.patch(`/todos/${id}`, { ...tasks.value[index], text: editedText });
+      tasks.value[index] = response.data; 
     } catch (error) {
       console.error('Error editing task:', error);
     }
   }
 };
+
+
 </script>
 
 <style scoped>
