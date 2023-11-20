@@ -6,7 +6,7 @@
       <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-      />\
+      />
       <h1>Todo List</h1>
       <div class="create-new">
         <input v-model="newTask" @keydown.enter="addTask" placeholder="Add new task..." />
@@ -16,10 +16,12 @@
 
     <!-- List of tasks -->
       <div class="tasks-container">
-  <h4>Active Tasks</h4>
-  <div class="tasks">
-    <div v-for="(task, index) in tasks" :key="index">
-      <div class="content" :class="{ 'completed': task.completed }">
+        <h4>Active Tasks</h4>
+    <div class="tasks">
+      <div
+        v-for="(task, index) in tasks" :key="index" :class="{ 'task': true, 'is-complete': task.completed }">
+        <!-- list -->
+        <div class="content" :class="{ 'completed': task.completed }" >
         <p v-if="task && task.completed !== undefined" :style="{ 'text-decoration': task && task.completed ? 'line-through' : 'none' }">{{ task && task.text }}</p>
 
         <p class="task-date">{{ task.date }}</p>
@@ -34,18 +36,27 @@
     </div>
 
     <!-- completed tasks -->
-    <div class="completed-tasks">
-      <h4>Completed Tasks</h4>
-      <div v-for="(completedTask, index) in completedTasks" :key="index" class="btnCompleteTask">
-        <p> <i class="fas fa-check"></i> {{ completedTask.text }}</p>
-        <div>
-          <button class="undo" @click="undoTask(completedTask.id, index)"> <i class="fas fa-undo"></i> </button>
-          <button class="delete" @click="deleteCompletedTask(completedTask.id, index)"><i class="fas fa-trash-alt"></i></button>
-        </div>
-      </div>
+   <div class="completed-tasks">
+  <h4>Completed Tasks</h4>
+  <div v-for="(completedTask, index) in completedTasks" :key="index" class="btnCompleteTask">
+    <p v-if="completedTask && completedTask.text">
+      <i class="fas fa-check"></i>{{ completedTask.text }}
+    </p>
+    <div>
+      <button class="undo" @click="undoTask(completedTask.id, index)">
+        <i class="fas fa-undo"></i>
+      </button>
+      <button class="delete" @click="deleteCompletedTask(completedTask.id, index)">
+        <i class="fas fa-trash-alt"></i>
+      </button>
     </div>
   </div>
+</div>
+
+
+    </div>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
@@ -82,7 +93,6 @@ const addTask = async () => {
     newTask.value = '';
 
     try {
-
       const response = await fetch('/todos', {
         method: 'POST',
         headers: {
@@ -94,7 +104,7 @@ const addTask = async () => {
       if (!response.ok) {
         console.error('Error adding task to server:', response.statusText);
       } else {
-        console.log('Task added to server successfully:', newTaskData);
+        console.log('Task added to server successfully');
       }
     } catch (error) {
       console.error('Error adding task to server:', error);
@@ -104,18 +114,20 @@ const addTask = async () => {
 
 const toggleTaskStatus = async (id: number, index: number) => {
   const task = tasks.value[index];
+
   try {
     const response = await api.patch(`/todos/${id}`, { completed: !task.completed });
 
-    tasks.value.splice(index, 1);
+    const updatedTask = response.data;
 
     if (!task.completed) {
-      const completedTask = response.data;
-      completedTasks.value.push(completedTask);
-    } else {
-      completedTasks.value = completedTasks.value.filter(
-        (completedTask) => completedTask.id !== id
-      );
+      completedTasks.value.push(updatedTask);
+    }
+
+    tasks.value.splice(index, 1);
+
+    if (updatedTask && updatedTask.text) {
+      console.log('Completed Task Text:', updatedTask.text);
     }
   } catch (error) {
     console.error('Error toggling task status:', error);
@@ -124,19 +136,34 @@ const toggleTaskStatus = async (id: number, index: number) => {
 
 
 
+
+
 const undoTask = async (id: number, index: number) => {
-  const task = completedTasks.value[index];
-  if (task) {
-    try {
-      const response = await api.patch(`/todos/${id}`, { completed: false });
+  try {
+    const response = await api.patch(`/todos/${id}`, { completed: false });
+
+    if (response && response.data) {
+      const completedTask = response.data;
+
       completedTasks.value.splice(index, 1);
-      task.completed = false;
-      tasks.value.push(task);
-    } catch (error) {
-      console.error('Error undoing task:', error);
+
+      const taskIndex = tasks.value.findIndex((task) => task.id === id);
+      if (taskIndex !== -1) {
+        tasks.value[taskIndex] = completedTask;
+      } else {
+
+        tasks.value.push(completedTask);
+      }
+
+      console.log('Task undone successfully:', completedTask);
+    } else {
+      console.error('Error undoing task: Incomplete or undefined response data');
     }
+  } catch (error) {
+    console.error('Error undoing task:', error);
   }
 };
+
 
 const deleteTask = async (id: number, index: number) => {
   try {
@@ -172,7 +199,7 @@ const deleteCompletedTask = async (id: number, index: number) => {
 };
 
 const editTask = async (id: number, index: number) => {
-  const editedText = prompt('Edit task:', tasks.value[index].text);
+  const editedText = prompt('Edit task:', tasks.value[index].text); 
   if (editedText !== null) {
     const updatedTaskData = { ...tasks.value[index], text: editedText };
 
