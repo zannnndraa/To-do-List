@@ -6,7 +6,7 @@
       <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-      />
+      />\
       <h1>Todo List</h1>
       <div class="create-new">
         <input v-model="newTask" @keydown.enter="addTask" placeholder="Add new task..." />
@@ -58,44 +58,49 @@ type Task = { id: number; text: string; completed: boolean; date: string };
 const newTask = ref('');
 const tasks = ref<Task[]>([]);
 const completedTasks = ref<Task[]>([]);
-
-const generateTaskId = () => {
+  const generateTaskId = () => {
   const currentDate = new Date();
   const dateString = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
-  return ++nextTaskId;
-  
+  const taskId = ++nextTaskId; 
+  return taskId;
 };
+
 
 
 const addTask = async () => {
   if (newTask.value.trim() !== '') {
     const taskId = generateTaskId();
 
+    const newTaskData = {
+      id: taskId,
+      text: newTask.value,
+      completed: false,
+      date: new Date().toISOString(),
+    };
+
+    tasks.value.push(newTaskData);
+    newTask.value = '';
+
     try {
-      const response = await api.post('/todos', {
-        id: taskId,
-        text: newTask.value,
-        completed: false,
-        date: new Date().toISOString(),
+
+      const response = await fetch('/todos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTaskData),
       });
 
-      const addedTask = response.data;
-
-      
-      if (addedTask && addedTask.id && addedTask.text && addedTask.date) {
-        tasks.value.push(addedTask);
-        newTask.value = '';
-        console.log('Task added successfully:', tasks);
+      if (!response.ok) {
+        console.error('Error adding task to server:', response.statusText);
       } else {
-        console.error('Invalid response format for added task:', tasks);
+        console.log('Task added to server successfully:', newTaskData);
       }
-
     } catch (error) {
-      console.error('Error adding task:', error);
+      console.error('Error adding task to server:', error);
     }
   }
 };
-
 
 const toggleTaskStatus = async (id: number, index: number) => {
   const task = tasks.value[index];
@@ -103,6 +108,7 @@ const toggleTaskStatus = async (id: number, index: number) => {
     const response = await api.patch(`/todos/${id}`, { completed: !task.completed });
 
     tasks.value.splice(index, 1);
+
     if (!task.completed) {
       const completedTask = response.data;
       completedTasks.value.push(completedTask);
@@ -110,12 +116,13 @@ const toggleTaskStatus = async (id: number, index: number) => {
       completedTasks.value = completedTasks.value.filter(
         (completedTask) => completedTask.id !== id
       );
-      tasks.value.push(response.data);
     }
   } catch (error) {
     console.error('Error toggling task status:', error);
   }
 };
+
+
 
 const undoTask = async (id: number, index: number) => {
   const task = completedTasks.value[index];
@@ -133,17 +140,32 @@ const undoTask = async (id: number, index: number) => {
 
 const deleteTask = async (id: number, index: number) => {
   try {
-    await api.delete(`/todos/${id}`);
-    tasks.value.splice(index, 1);
+    const response = await fetch(`/todos/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      console.error('Error deleting task from server:', response.statusText);
+    } else {
+
+      tasks.value.splice(index, 1);
+      console.log('Task deleted from server successfully:', id);
+    }
   } catch (error) {
-    console.error('Error deleting task:', error);
+    console.error('Error deleting task from server:', error);
   }
 };
 
+
 const deleteCompletedTask = async (id: number, index: number) => {
   try {
+
     await api.delete(`/todos/${id}`);
+
+
     completedTasks.value.splice(index, 1);
+
+    console.log('Completed task deleted successfully:', id);
   } catch (error) {
     console.error('Error deleting completed task:', error);
   }
@@ -152,14 +174,32 @@ const deleteCompletedTask = async (id: number, index: number) => {
 const editTask = async (id: number, index: number) => {
   const editedText = prompt('Edit task:', tasks.value[index].text);
   if (editedText !== null) {
+    const updatedTaskData = { ...tasks.value[index], text: editedText };
+
     try {
-      const response = await api.patch(`/todos/${id}`, { ...tasks.value[index], text: editedText });
-      tasks.value[index] = response.data;
+      const response = await fetch(`/todos/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTaskData), 
+      });
+
+      if (!response.ok) {
+        console.error('Error editing task on server:', response.statusText);
+      } else {
+   
+        tasks.value[index] = updatedTaskData;
+        console.log('Task edited on server successfully:', updatedTaskData);
+      }
     } catch (error) {
-      console.error('Error editing task:', error);
+      console.error('Error editing task on server:', error);
     }
   }
 };
+
+
+
 </script>
 
 <style scoped>
