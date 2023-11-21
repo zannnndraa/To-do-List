@@ -1,4 +1,4 @@
-<!-- app.vue -->
+
 <template>
   <div>
     <!-- header -->
@@ -23,8 +23,7 @@
         <!-- list -->
         <div class="content" :class="{ 'completed': task.completed }" >
         <p v-if="task && task.completed !== undefined" :style="{ 'text-decoration': task && task.completed ? 'line-through' : 'none' }">{{ task && task.text }}</p>
-
-        <p class="task-date">{{ task.date }}</p>
+        <p class="task-date">{{ new Date(task.date).toLocaleDateString() }}</p>
           </div>
           <div class="buttons">
             <button @click="toggleTaskStatus(task.id, index)">Done</button>
@@ -39,22 +38,18 @@
    <div class="completed-tasks">
   <h4>Completed Tasks</h4>
   <div v-for="(completedTask, index) in completedTasks" :key="index" class="btnCompleteTask">
-    <p v-if="completedTask && completedTask.text">
-      <i class="fas fa-check"></i>{{ completedTask.text }}
-    </p>
-    <div>
-      <button class="undo" @click="undoTask(completedTask.id, index)">
-        <i class="fas fa-undo"></i>
-      </button>
-      <button class="delete" @click="deleteCompletedTask(completedTask.id, index)">
-        <i class="fas fa-trash-alt"></i>
-      </button>
-    </div>
+  <p v-if="completedTask && completedTask.text"> <i class="fas fa-check"></i>{{ completedTask.text }}</p>
+  <div>
+    <button class="undo" @click="undoTask(completedTask.id, index)">
+      <i class="fas fa-undo"></i>
+    </button>
+    <button class="delete" @click="deleteCompletedTask(completedTask.id, index)">
+      <i class="fas fa-trash-alt"></i>
+    </button>
   </div>
 </div>
-
-
     </div>
+  </div>
 </template>
 
 
@@ -118,51 +113,51 @@ const toggleTaskStatus = async (id: number, index: number) => {
   try {
     const response = await api.patch(`/todos/${id}`, { completed: !task.completed });
 
-    const updatedTask = response.data;
-
     if (!task.completed) {
-      completedTasks.value.push(updatedTask);
+      task.completed = true;
+      completedTasks.value.push(task);
+      tasks.value.splice(index, 1);
+
+      console.log('Task done!');
     }
 
-    tasks.value.splice(index, 1);
-
-    if (updatedTask && updatedTask.text) {
-      console.log('Completed Task Text:', updatedTask.text);
-    }
   } catch (error) {
     console.error('Error toggling task status:', error);
   }
 };
 
-
-
-
-
 const undoTask = async (id: number, index: number) => {
   try {
-    const response = await api.patch(`/todos/${id}`, { completed: false });
+    const response = await fetch(`/api/todos/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ completed: false }),
+    });
 
-    if (response && response.data) {
-      const completedTask = response.data;
-
+    if (response.ok) {
+      const completedTask = completedTasks.value[index];
       completedTasks.value.splice(index, 1);
 
-      const taskIndex = tasks.value.findIndex((task) => task.id === id);
-      if (taskIndex !== -1) {
-        tasks.value[taskIndex] = completedTask;
-      } else {
-
+      if (completedTask) {
+        completedTask.completed = false;
         tasks.value.push(completedTask);
+        console.log('Task undo successfully:', {
+          text: completedTask.text,
+          id: completedTask.id,
+        });
+      } else {
+        console.error('Error undoing task: Task not found in completedTasks');
       }
-
-      console.log('Task undone successfully:', completedTask);
     } else {
-      console.error('Error undoing task: Incomplete or undefined response data');
+      console.error('Error undoing task:', response.statusText);
     }
   } catch (error) {
     console.error('Error undoing task:', error);
   }
 };
+
 
 
 const deleteTask = async (id: number, index: number) => {
@@ -186,15 +181,18 @@ const deleteTask = async (id: number, index: number) => {
 
 const deleteCompletedTask = async (id: number, index: number) => {
   try {
-
-    await api.delete(`/todos/${id}`);
-
+    const response = await fetch(`/todos/${id}`, {
+      method: 'DELETE',
+    });
 
     completedTasks.value.splice(index, 1);
-
-    console.log('Completed task deleted successfully:', id);
+    if (!response.ok) {
+      console.error('Error deleting task from server:', response.statusText);
+    } else {
+      console.log('Task deleted from server successfully:', id);
+    }
   } catch (error) {
-    console.error('Error deleting completed task:', error);
+    console.error('Error deleting task from server:', error);
   }
 };
 

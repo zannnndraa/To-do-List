@@ -1,4 +1,7 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
-export default defineNuxtConfig({
-  devtools: { enabled: true }
-})
+export default {
+
+  buildModules: ['@nuxt/typescript-build'],
+  modules: [
+    // Other modules you want to include
+  ],
+}
